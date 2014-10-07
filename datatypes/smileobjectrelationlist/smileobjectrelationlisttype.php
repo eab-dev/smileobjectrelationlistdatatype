@@ -19,8 +19,13 @@ class smileObjectRelationListType extends eZDataType
      Validates the input and returns true if the input was
     valid for this datatype.
     */
-    function validateObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
+    function validateObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute, $editingObject = true )
     {
+        if ( $editingObject and $contentObjectAttribute->contentClassAttributeIsInformationCollector() )
+            $ignoreNoneSelected = true;
+        else
+            $ignoreNoneSelected = false; // never throw an error if there are no relations selected
+
         $inputParameters = $contentObjectAttribute->inputParameters();
         $contentClassAttribute = $contentObjectAttribute->contentClassAttribute();
         $parameters = $contentObjectAttribute->validationParameters();
@@ -36,7 +41,7 @@ class smileObjectRelationListType extends eZDataType
     
         // Check if selection type is not browse
         $classContent = $contentClassAttribute->content();
-        if ( $classContent['selection_type'] != 0 )
+        if ( $classContent['selection_type'] != 0 and !$ignoreNoneSelected )
         {
             $selectedObjectIDArray = $http->hasPostVariable( $postVariableName ) ? $http->postVariable( $postVariableName ) : false;
             if ( $contentObjectAttribute->validateIsRequired() and $selectedObjectIDArray === false )
@@ -49,7 +54,7 @@ class smileObjectRelationListType extends eZDataType
         }
     
         $content = $contentObjectAttribute->content();
-        if ( $contentObjectAttribute->validateIsRequired() and count( $content['relation_list'] ) == 0 )
+        if ( $contentObjectAttribute->validateIsRequired() and count( $content['relation_list'] ) == 0 and !$ignoreNoneSelected )
         {
             $contentObjectAttribute->setValidationError( ezpI18n::tr( 'kernel/classes/datatypes',
                     'Missing objectrelation list input.' ) );
@@ -1789,12 +1794,13 @@ class smileObjectRelationListType extends eZDataType
     {
         return true;
     }
+
     function validateCollectionAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
-        return $this->validateObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute );
+        // this method is called when a user fills in the form (ie view not edit), so set $editingObject = false
+        return $this->validateObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute, false );
     }
-    
-    
+
     function fetchCollectionAttributeHTTPInput( $collection, $collectionAttribute, $http, $base, $contentObjectAttribute )
     {
         $content = $contentObjectAttribute->content();
@@ -1878,7 +1884,7 @@ class smileObjectRelationListType extends eZDataType
         {
             $priorities[$contentObjectAttributeID][$i] = (int) $priorities[$contentObjectAttributeID][$i];
             $existsPriorities[$i] = $priorities[$contentObjectAttributeID][$i];
-        
+
             // Change objects' priorities providing their uniqueness.
             for ( $j = 0; $j < $c; ++$j )
             {
