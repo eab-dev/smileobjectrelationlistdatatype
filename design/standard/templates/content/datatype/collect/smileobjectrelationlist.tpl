@@ -5,6 +5,8 @@
      new_object_initial_node_placement=false()
      browse_object_start_node=false()}
 
+{let selected_content=cond( is_set( $#collection_attributes[$attribute.id] ), $#collection_attributes[$attribute.id].content, $attribute.content )}
+
 {if $class_content.selection_type|ne( 0 )} {* If current selection mode is not 'browse'. *}
         {default attribute_base=ContentObjectAttribute}
         {let parent_node=cond( and( is_set( $class_content.default_placement.node_id ),
@@ -30,13 +32,13 @@
             <input type="hidden" name="single_select_{$attribute.id}" value="1" />
             {if ne( count( $nodesList ), 0)}
             <select name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[]">
-                {if $attribute.contentclass_attribute.is_required|not}
+                {if $selected_contentclass_attribute.is_required|not}
                     <option value="no_relation" {if eq( $attribute.content.relation_list|count, 0 )} selected="selected"{/if}>{'No relation'|i18n( 'design/standard/content/datatype' )}</option>
                 {/if}
                 {section var=node loop=$nodesList}
                     <option value="{$node.contentobject_id}"
-                    {if ne( count( $attribute.content.relation_list ), 0)}
-                    {foreach $attribute.content.relation_list as $item}
+                    {if ne( count( $selected_content.relation_list ), 0)}
+                    {foreach $selected_content.relation_list as $item}
                          {if eq( $item.contentobject_id, $node.contentobject_id )}
                             selected="selected"
                             {break}
@@ -55,11 +57,11 @@
             <input type="hidden" name="single_select_{$attribute.id}" value="1" />
             {if $attribute.contentclass_attribute.is_required|not}
                 <input type="radio" name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[]" value="no_relation"
-                {if eq( $attribute.content.relation_list|count, 0 )} checked="checked"{/if}>{'No relation'|i18n( 'design/standard/content/datatype' )}<br />{/if}
+                {if eq( $selected_content.relation_list|count, 0 )} checked="checked"{/if}>{'No relation'|i18n( 'design/standard/content/datatype' )}<br />{/if}
             {section var=node loop=$nodesList}
                 <input type="radio" name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[]" value="{$node.contentobject_id}"
-                {if ne( count( $attribute.content.relation_list ), 0)}
-                {foreach $attribute.content.relation_list as $item}
+                {if ne( count( $selected_content.relation_list ), 0)}
+                {foreach $selected_content.relation_list as $item}
                      {if eq( $item.contentobject_id, $node.contentobject_id )}
                             checked="checked"
                             {break}
@@ -74,14 +76,12 @@
         {case match=3} {* check boxes list *}
             {section var=node loop=$nodesList}
                 <input type="checkbox" name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[{$node.node_id}]" value="{$node.contentobject_id}"
-                {if ne( count( $attribute.content.relation_list ), 0)}
-                {foreach $attribute.content.relation_list as $item}
+                {foreach $selected_content.relation_list as $item}
                      {if eq( $item.contentobject_id, $node.contentobject_id )}
                             checked="checked"
                             {break}
                      {/if}
                 {/foreach}
-                {/if}
                 />
                 {$node.name|wash} <br/>
             {/section}
@@ -93,8 +93,8 @@
             <select name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[]" size="10" multiple>
                 {section var=node loop=$nodesList}
                     <option value="{$node.contentobject_id}"
-                    {if ne( count( $attribute.content.relation_list ), 0)}
-                    {foreach $attribute.content.relation_list as $item}
+                    {if ne( count( $selected_content.relation_list ), 0)}
+                    {foreach $selected_content.relation_list as $item}
                          {if eq( $item.contentobject_id, $node.contentobject_id )}
                             selected="selected"
                             {break}
@@ -117,7 +117,7 @@
                    <li>
                         <input type="checkbox" name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[{$node.node_id}]" value="{$node.contentobject_id}"
                         {if ne( count( $attribute.content.relation_list ), 0)}
-                        {foreach $attribute.content.relation_list as $item}
+                        {foreach $selected_content.relation_list as $item}
                            {if eq( $item.contentobject_id, $node.contentobject_id )}
                                checked="checked"
                                {break}
@@ -139,14 +139,14 @@
             <ul>
                 {if $attribute.contentclass_attribute.is_required|not}
             <li>
-                         <input value="no_relation" type="radio" name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[]" {if eq( $attribute.content.relation_list|count, 0 )} checked="checked"{/if}>{'No relation'|i18n( 'design/standard/content/datatype' )}<br />
+                         <input value="no_relation" type="radio" name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[]" {if eq( $selected_content.relation_list|count, 0 )} checked="checked"{/if}>{'No relation'|i18n( 'design/standard/content/datatype' )}<br />
                     </li>
                 {/if}
                 {section var=node loop=$nodesList}
                     <li>
                         <input type="radio" name="{$attribute_base}_data_smile_object_relation_list_{$attribute.id}[]" value="{$node.contentobject_id}"
-                        {if ne( count( $attribute.content.relation_list ), 0)}
-                        {foreach $attribute.content.relation_list as $item}
+                        {if ne( count( $selected_content.relation_list ), 0)}
+                        {foreach $selected_content.relation_list as $item}
                            {if eq( $item.contentobject_id, $node.contentobject_id )}
                                checked="checked"
                                {break}
